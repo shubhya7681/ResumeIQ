@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ResumeIQ – AI Resume Analyzer & Career Guidance Portal
 
 ResumeIQ is a premium, full-stack AI-powered web application that analyzes resumes, calculates ATS compatibility, detects skills, recommends job roles, and generates personalized career roadmaps and interview questions.
@@ -102,3 +103,7 @@ Resume Project/
 
 ## generating Sample Resumes
 To generate sample resumes for testing, you can use the `generate_samples.py` script provided in the project folder (if created), or just upload any PDF/DOCX file.
+=======
+# ResumeIQ
+ResumeIQ is an AI-powered resume analysis and career guidance platform that helps users improve their resumes for job applications. The system uses Natural Language Processing (NLP) and Machine Learning techniques to analyze resumes, calculate ATS compatibility scores, detect technical and soft skills, predict suitable job roles.
+>>>>>>> 221de0fcb9a95d8a6a133e35af034f29a3b6448d
