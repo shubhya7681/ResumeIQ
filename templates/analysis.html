@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+{% block title %}Analysis Results — ResumeIQ{% endblock %}
+
+{% block content %}
+<section class="analysis-section">
+    <div class="section-container">
+        <!-- Analysis Header -->
+        <div class="analysis-header animate-fade-in">
+            <div>
+                <span class="section-badge"><i class="fas fa-microscope"></i> AI Analysis</span>
+                <h1><i class="fas fa-chart-pie"></i> Analysis <span class="gradient-text">Results</span></h1>
+                <p class="file-info">
+                    <i class="fas fa-file-alt"></i> {{ resume.original_filename }} 
+                    <span class="separator">•</span>
+                    <i class="fas fa-calendar"></i> {{ resume.upload_date.strftime('%B %d, %Y') }}
+                </p>
+            </div>
+            <div class="analysis-actions">
+                <a href="{{ url_for('download_report', resume_id=resume.id) }}" class="btn btn-primary" id="download-report">
+                    <i class="fas fa-download"></i> Download Report
+                </a>
+                <a href="{{ url_for('upload') }}" class="btn btn-glass" id="new-analysis">
+                    <i class="fas fa-redo"></i> New Analysis
+                </a>
+            </div>
+        </div>
+
+        <!-- Score Cards -->
+        {% set rscore = analysis.resume_score|default(0)|int %}
+        {% set ascore = analysis.ats_score|default(0)|int %}
+        <div class="score-cards-grid animate-fade-in-up">
+            <div class="score-card glass-card" id="resume-score-card">
+                <h3><i class="fas fa-star" style="color:#6C63FF;"></i> Resume Score</h3>
+                <div class="ring-progress" style="--ring-value: {{ rscore }}; --ring-color: #6C63FF;">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="ring-fg" cx="60" cy="60" r="52"
+                                stroke-dasharray="{{ 326.7 }}"
+                                stroke-dashoffset="{{ 326.7 - (rscore / 100) * 326.7 }}"/>
+                    </svg>
+                    <div class="ring-label">
+                        <span class="score-value">{{ rscore }}</span>
+                        <span class="score-label">/100</span>
+                    </div>
+                </div>
+                <p class="score-verdict {% if rscore >= 70 %}text-success{% elif rscore >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                    {% if rscore >= 80 %}Excellent{% elif rscore >= 60 %}Good{% elif rscore >= 40 %}Average{% else %}Needs Work{% endif %}
+                </p>
+            </div>
+            <div class="score-card glass-card" id="ats-score-card">
+                <h3><i class="fas fa-robot" style="color:#00D4FF;"></i> ATS Score</h3>
+                <div class="ring-progress" style="--ring-value: {{ ascore }}; --ring-color: #00D4FF;">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="ring-bg" cx="60" cy="60" r="52"/>
+                        <circle class="ring-fg" cx="60" cy="60" r="52"
+                                stroke-dasharray="{{ 326.7 }}"
+                                stroke-dashoffset="{{ 326.7 - (ascore / 100) * 326.7 }}"/>
+                    </svg>
+                    <div class="ring-label">
+                        <span class="score-value">{{ ascore }}</span>
+                        <span class="score-label">/100</span>
+                    </div>
+                </div>
+                <p class="score-verdict {% if ascore >= 70 %}text-success{% elif ascore >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                    {% if ascore >= 80 %}ATS Friendly{% elif ascore >= 60 %}Passable{% elif ascore >= 40 %}Needs Improvement{% else %}Not ATS Friendly{% endif %}
+                </p>
+            </div>
+            <div class="score-card glass-card score-card-wide" id="breakdown-card">
+                <h3><i class="fas fa-chart-bar" style="color:#C49BFF;"></i> Score Breakdown</h3>
+                <div class="chart-wrapper">
+                    <canvas id="breakdownChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strengths & Weaknesses -->
+        <div class="analysis-grid animate-fade-in-up delay-1">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-check-circle" style="color: #77DD77;"></i> Strengths</h3>
+                    <span class="card-count">{{ analysis.strengths|default([])|length }}</span>
+                </div>
+                <ul class="analysis-list strengths-list">
+                    {% for strength in analysis.strengths|default([]) %}
+                    <li><i class="fas fa-check"></i> {{ strength }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-exclamation-triangle" style="color: #FFB347;"></i> Areas for Improvement</h3>
+                    <span class="card-count warning">{{ analysis.weaknesses|default([])|length }}</span>
+                </div>
+                <ul class="analysis-list weaknesses-list">
+                    {% for weakness in analysis.weaknesses|default([]) %}
+                    <li><i class="fas fa-exclamation"></i> {{ weakness }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Missing Sections -->
+        {% if analysis.missing_sections|default([])|length > 0 %}
+        <div class="missing-sections animate-fade-in-up delay-1">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-puzzle-piece" style="color: #FF6B9D;"></i> Missing Sections</h3>
+                </div>
+                <div class="missing-tags">
+                    {% for section in analysis.missing_sections %}
+                    <span class="missing-tag"><i class="fas fa-times-circle"></i> {{ section }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Skills Section -->
+        <div class="skills-section animate-fade-in-up delay-1">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-code" style="color: #6C63FF;"></i> Skill Detection</h3>
+                    <span class="card-count">{{ skills.found|default([])|length }} found</span>
+                </div>
+                <div class="skills-content">
+                    <div class="skills-layout">
+                        <!-- Found Skills -->
+                        <div class="skills-tags-area">
+                            <div class="skill-group">
+                                <h4><i class="fas fa-check-circle" style="color: #77DD77;"></i> Found Skills ({{ skills.found|default([])|length }})</h4>
+                                <div class="skill-tags">
+                                    {% for skill in skills.found|default([]) %}
+                                    <span class="skill-tag skill-found">{{ skill }}</span>
+                                    {% endfor %}
+                                    {% if skills.found|default([])|length == 0 %}
+                                    <span class="text-muted">No skills detected</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Missing Skills -->
+                            <div class="skill-group">
+                                <h4><i class="fas fa-times-circle" style="color: #FF6B9D;"></i> Missing Common Skills</h4>
+                                <div class="skill-tags">
+                                    {% for skill in skills.missing|default([]) %}
+                                    <span class="skill-tag skill-missing">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <!-- Suggested Skills -->
+                            {% if skills.suggested|default([])|length > 0 %}
+                            <div class="skill-group">
+                                <h4><i class="fas fa-lightbulb" style="color: #FFB347;"></i> Suggested Skills to Learn</h4>
+                                <div class="skill-tags">
+                                    {% for skill in skills.suggested %}
+                                    <span class="skill-tag skill-suggested">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Skills by Category Chart -->
+                        {% if skills.by_category|default({})|length > 0 %}
+                        <div class="skill-chart-wrapper">
+                            <canvas id="skillPieChart"></canvas>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Recommendations -->
+        {% if jobs|default([])|length > 0 %}
+        <div class="jobs-section animate-fade-in-up delay-2">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-briefcase" style="color: #FFB347;"></i> Recommended Job Roles</h3>
+                </div>
+                <div class="jobs-grid">
+                    {% for job in jobs %}
+                    <div class="job-card" id="job-{{ loop.index }}">
+                        <div class="job-card-header">
+                            <h4>{{ job.role }}</h4>
+                            <div class="job-match-badge">{{ job.match_score }}% Match</div>
+                        </div>
+                        <p class="job-desc">{{ job.description }}</p>
+                        <div class="job-meta">
+                            <span><i class="fas fa-dollar-sign"></i> {{ job.avg_salary }}</span>
+                            <span><i class="fas fa-fire"></i> {{ job.demand }} Demand</span>
+                        </div>
+                        <div class="job-match-bar">
+                            <div class="job-match-fill" style="width: {{ job.match_score }}%;"></div>
+                        </div>
+                        {% if job.missing_required|default([])|length > 0 %}
+                        <div class="job-missing">
+                            <small>Missing required: {{ job.missing_required|join(', ') }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="jobs-section animate-fade-in-up delay-2">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-briefcase" style="color: #FFB347;"></i> Recommended Job Roles</h3>
+                </div>
+                <div class="empty-state" style="padding: 30px;">
+                    <i class="fas fa-search" style="font-size:2rem;"></i>
+                    <h3>No Strong Matches Found</h3>
+                    <p>Add more skills to your resume to get personalized job recommendations.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Suggestions -->
+        {% if analysis.suggestions|default([])|length > 0 %}
+        <div class="suggestions-section animate-fade-in-up delay-2">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-magic" style="color: #C49BFF;"></i> Improvement Suggestions</h3>
+                </div>
+                <div class="suggestions-list">
+                    {% for suggestion in analysis.suggestions %}
+                    {% if suggestion is mapping %}
+                    <div class="suggestion-item priority-{{ suggestion.priority|default('low') }}">
+                        <div class="suggestion-priority">
+                            <span class="priority-badge priority-{{ suggestion.priority|default('low') }}">
+                                {{ suggestion.priority|default('low')|upper }}
+                            </span>
+                        </div>
+                        <div class="suggestion-content">
+                            <h4>{{ suggestion.title }}</h4>
+                            <p>{{ suggestion.description }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="suggestion-item priority-low">
+                        <div class="suggestion-priority">
+                            <span class="priority-badge priority-low">TIP</span>
+                        </div>
+                        <div class="suggestion-content">
+                            <p>{{ suggestion }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Interview Questions -->
+        {% if questions|default({})|length > 0 %}
+        <div class="questions-section animate-fade-in-up delay-2">
+            <div class="glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-question-circle" style="color: #00D4FF;"></i> Interview Questions for Your Skills</h3>
+                </div>
+                <div class="questions-accordion">
+                    {% for skill, skill_questions in questions.items() %}
+                    <div class="accordion-item" id="accordion-{{ loop.index }}">
+                        <button class="accordion-trigger" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-code"></i> {{ skill }}</span>
+                            <span class="accordion-badge">{{ skill_questions|length }} questions</span>
+                            <i class="fas fa-chevron-down accordion-arrow"></i>
+                        </button>
+                        <div class="accordion-content">
+                            {% for q in skill_questions %}
+                            <div class="question-item">
+                                <span class="question-number">Q{{ loop.index }}</span>
+                                <div class="question-text">
+                                    {% if q is mapping %}
+                                    <p>{{ q.question }}</p>
+                                    <span class="difficulty-badge difficulty-{{ q.difficulty|default('medium')|lower }}">{{ q.difficulty|default('Medium') }}</span>
+                                    {% else %}
+                                    <p>{{ q }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Back to Dashboard -->
+        <div class="analysis-footer animate-fade-in-up delay-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-glass"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="{{ url_for('career_roadmap') }}" class="btn btn-primary"><i class="fas fa-road"></i> View Career Roadmap</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ─── Score Breakdown Chart ──────────────────────────────────────────────
+const breakdownCtx = document.getElementById('breakdownChart');
+if (breakdownCtx) {
+    const sectionScores = {{ analysis.section_scores|default({})|tojson }};
+    new Chart(breakdownCtx, {
+        type: 'radar',
+        data: {
+            labels: ['Sections', 'Length', 'Action Verbs', 'Formatting', 'Contact Info', 'Metrics'],
+            datasets: [{
+                label: 'Your Score',
+                data: [
+                    sectionScores.sections || 0,
+                    sectionScores.length || 0,
+                    sectionScores.action_verbs || 0,
+                    sectionScores.formatting || 0,
+                    sectionScores.contact_info || 0,
+                    sectionScores.quantification || 0
+                ],
+                backgroundColor: 'rgba(108, 99, 255, 0.25)',
+                borderColor: '#6C63FF',
+                borderWidth: 2,
+                pointBackgroundColor: '#6C63FF',
+                pointBorderColor: '#fff',
+                pointRadius: 4,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#6C63FF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { color: 'rgba(255,255,255,0.5)', backdropColor: 'transparent', stepSize: 25, font: { size: 10 } },
+                    grid: { color: 'rgba(255,255,255,0.1)' },
+                    pointLabels: { color: 'rgba(255,255,255,0.8)', font: { size: 11, weight: '500' } },
+                    angleLines: { color: 'rgba(255,255,255,0.08)' }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+// ─── Skill Pie Chart ────────────────────────────────────────────────────
+const skillCtx = document.getElementById('skillPieChart');
+if (skillCtx) {
+    const skillsByCategory = {{ skills.by_category|default({})|tojson }};
+    const categories = Object.keys(skillsByCategory);
+    const counts = categories.map(c => skillsByCategory[c].length);
+    const chartColors = ['#6C63FF', '#00D4FF', '#FF6B9D', '#FFB347', '#77DD77', '#C49BFF', '#FF4444', '#44BBFF'];
+    
+    if (categories.length > 0) {
+        new Chart(skillCtx, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: chartColors.slice(0, categories.length),
+                    borderColor: 'rgba(10, 10, 26, 0.8)',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: 'rgba(255,255,255,0.7)', padding: 12, usePointStyle: true, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// ─── Accordion Toggle ───────────────────────────────────────────────────
+function toggleAccordion(trigger) {
+    const item = trigger.parentElement;
+    const content = item.querySelector('.accordion-content');
+    const arrow = trigger.querySelector('.accordion-arrow');
+    
+    item.classList.toggle('open');
+    if (item.classList.contains('open')) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    } else {
+        content.style.maxHeight = '0';
+        if (arrow) arrow.style.transform = 'rotate(0)';
+    }
+}
+</script>
+{% endblock %}

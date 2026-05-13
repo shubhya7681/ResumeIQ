@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}ResumeIQ — AI Resume Analyzer & Career Guidance{% endblock %}
+
+{% block content %}
+<!-- ─── Hero Section ───────────────────────────────────────────────────── -->
+<section class="hero" id="hero">
+    <div class="hero-bg-effects">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+        <div class="hero-grid-bg"></div>
+    </div>
+    <div class="hero-container">
+        <div class="hero-badge animate-fade-in">
+            <i class="fas fa-sparkles"></i> AI-Powered Resume Intelligence
+        </div>
+        <h1 class="hero-title animate-fade-in-up">
+            Transform Your Resume<br>
+            <span class="gradient-text">Into Your Dream Career</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-up delay-1">
+            Get instant AI analysis, ATS compatibility scoring, skill detection, 
+            personalized job recommendations, and a career roadmap — all in seconds.
+        </p>
+        <div class="hero-cta animate-fade-in-up delay-2">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket"></i> Get Started Free
+            </a>
+            <a href="#features" class="btn btn-glass btn-lg">
+                <i class="fas fa-play-circle"></i> See How It Works
+            </a>
+        </div>
+        <div class="hero-stats animate-fade-in-up delay-3">
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="10000">10,000+</span>
+                <span class="hero-stat-label">Resumes Analyzed</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="95">95%</span>
+                <span class="hero-stat-label">Accuracy Rate</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="hero-stat-number" data-count="50">50+</span>
+                <span class="hero-stat-label">Skills Detected</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Features Section ───────────────────────────────────────────────── -->
+<section class="section features-section" id="features">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Features</span>
+            <h2 class="section-title">Everything You Need to <span class="gradient-text">Stand Out</span></h2>
+            <p class="section-subtitle">Comprehensive resume analysis powered by advanced AI and NLP technology</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #6C63FF;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Resume Scoring</h3>
+                <p>Get a comprehensive score out of 100 with detailed breakdown across multiple criteria.</p>
+            </div>
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #00D4FF;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>ATS Compatibility</h3>
+                <p>Check how well your resume performs with Applicant Tracking Systems used by top companies.</p>
+            </div>
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #FF6B9D;">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>Skill Detection</h3>
+                <p>AI identifies 150+ technical and soft skills from your resume with category mapping.</p>
+            </div>
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #FFB347;">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <h3>Job Matching</h3>
+                <p>Get personalized job role recommendations based on your detected skill profile.</p>
+            </div>
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #77DD77;">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>Interview Prep</h3>
+                <p>Practice with AI-generated interview questions tailored to your skills.</p>
+            </div>
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon" style="--accent: #C49BFF;">
+                    <i class="fas fa-road"></i>
+                </div>
+                <h3>Career Roadmap</h3>
+                <p>Follow structured learning paths designed for your target career role.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── How It Works ───────────────────────────────────────────────────── -->
+<section class="section how-it-works-section" id="how-it-works">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Process</span>
+            <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+            <p class="section-subtitle">Three simple steps to transform your career trajectory</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">01</div>
+                <div class="step-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <h3>Upload Resume</h3>
+                <p>Drag & drop your PDF or DOCX resume. Our system securely processes your file instantly.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">02</div>
+                <div class="step-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI Analysis</h3>
+                <p>Our NLP engine extracts text, detects skills, scores sections, and evaluates ATS compatibility.</p>
+            </div>
+            <div class="step-connector"><i class="fas fa-chevron-right"></i></div>
+            <div class="step-card animate-on-scroll">
+                <div class="step-number">03</div>
+                <div class="step-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Get Insights</h3>
+                <p>Review detailed analysis, job matches, interview questions, and actionable improvement tips.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Testimonials ───────────────────────────────────────────────────── -->
+<section class="section testimonials-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Testimonials</span>
+            <h2 class="section-title">What Our <span class="gradient-text">Users Say</span></h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card glass-card animate-on-scroll">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"ResumeIQ helped me identify critical gaps in my resume. After implementing the suggestions, I got 3x more interview calls!"</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background: linear-gradient(135deg, #6C63FF, #00D4FF);">AP</div>
+                    <div>
+                        <strong>Aarav Patel</strong>
+                        <span>Software Engineer at Google</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card glass-card animate-on-scroll">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p>"The ATS scoring feature is a game-changer. I finally understood why my applications were getting filtered out."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background: linear-gradient(135deg, #FF6B9D, #FFB347);">SK</div>
+                    <div>
+                        <strong>Sneha Kumar</strong>
+                        <span>Data Analyst at Amazon</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card glass-card animate-on-scroll">
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                </div>
+                <p>"The career roadmap feature gave me a clear path to transition from a data analyst to a full-fledged data scientist."</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar" style="background: linear-gradient(135deg, #77DD77, #00D4FF);">RV</div>
+                    <div>
+                        <strong>Rahul Verma</strong>
+                        <span>Data Scientist at Microsoft</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── CTA Section ────────────────────────────────────────────────────── -->
+<section class="section cta-section">
+    <div class="cta-container">
+        <div class="cta-bg-effects">
+            <div class="cta-orb cta-orb-1"></div>
+            <div class="cta-orb cta-orb-2"></div>
+        </div>
+        <div class="cta-content">
+            <h2>Ready to Supercharge Your Resume?</h2>
+            <p>Join thousands of professionals who've transformed their careers with ResumeIQ</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket"></i> Start Analyzing — It's Free
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

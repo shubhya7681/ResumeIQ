@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Upload Resume — ResumeIQ{% endblock %}
+
+{% block content %}
+<section class="upload-section">
+    <div class="section-container">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Upload Your <span class="gradient-text">Resume</span></h2>
+            <p class="section-subtitle">Drag & drop or click to upload your PDF or DOCX resume for AI analysis</p>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-area-wrapper animate-fade-in-up">
+            <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" id="uploadForm">
+                <div class="upload-dropzone glass-card" id="dropzone">
+                    <div class="dropzone-content">
+                        <div class="dropzone-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>Drop your resume here</h3>
+                        <p>or <span class="dropzone-browse">browse files</span></p>
+                        <div class="dropzone-formats">
+                            <span><i class="fas fa-file-pdf"></i> PDF</span>
+                            <span><i class="fas fa-file-word"></i> DOCX</span>
+                            <span class="dropzone-size">Max 16MB</span>
+                        </div>
+                    </div>
+                    <input type="file" name="resume" id="resumeFile" accept=".pdf,.docx" hidden>
+                </div>
+
+                <!-- Selected File Preview -->
+                <div class="file-preview glass-card" id="filePreview" style="display:none;">
+                    <div class="file-preview-info">
+                        <i class="fas fa-file-alt file-preview-icon"></i>
+                        <div>
+                            <span class="file-preview-name" id="fileName"></span>
+                            <span class="file-preview-size" id="fileSize"></span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="clearFile()">
+                        <i class="fas fa-times"></i> Remove
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block upload-submit" id="uploadBtn" style="display:none;">
+                    <i class="fas fa-rocket"></i> Analyze Resume
+                </button>
+            </form>
+        </div>
+
+        <!-- Upload Tips -->
+        <div class="upload-tips animate-fade-in-up delay-1">
+            <div class="glass-card">
+                <h3><i class="fas fa-lightbulb"></i> Tips for Best Results</h3>
+                <div class="tips-grid">
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Use a clean, simple format without complex tables or graphics</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Include clear section headings (Education, Experience, Skills)</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Use standard fonts like Arial, Calibri, or Times New Roman</span>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Keep your resume between 1-2 pages for optimal analysis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload History -->
+        {% if resumes %}
+        <div class="upload-history animate-fade-in-up delay-2">
+            <div class="content-card glass-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Recent Uploads</h3>
+                </div>
+                <div class="history-list">
+                    {% for resume in resumes[:5] %}
+                    <div class="history-item">
+                        <div class="history-file">
+                            <i class="fas fa-file-{% if resume.original_filename.endswith('.pdf') %}pdf{% else %}word{% endif %}"
+                               style="color: {% if resume.original_filename.endswith('.pdf') %}#ff4444{% else %}#4488ff{% endif %};"></i>
+                            <div>
+                                <span class="history-name">{{ resume.original_filename }}</span>
+                                <span class="history-date">{{ resume.upload_date.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                            </div>
+                        </div>
+                        <div class="history-scores">
+                            <span class="score-badge {% if resume.score >= 70 %}score-high{% elif resume.score >= 40 %}score-mid{% else %}score-low{% endif %}">
+                                {{ "%.0f"|format(resume.score) }}/100
+                            </span>
+                            <a href="{{ url_for('analysis', resume_id=resume.id) }}" class="btn btn-sm btn-glass">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('resumeFile');
+const filePreview = document.getElementById('filePreview');
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadForm = document.getElementById('uploadForm');
+
+// Click to browse
+dropzone.addEventListener('click', () => fileInput.click());
+
+// Drag and drop events
+dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => {
+    dropzone.classList.remove('dragover');
+});
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        showFilePreview(files[0]);
+    }
+});
+
+// File input change
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        showFilePreview(fileInput.files[0]);
+    }
+});
+
+function showFilePreview(file) {
+    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!validTypes.includes(file.type) && !file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
+        alert('Please upload a PDF or DOCX file only.');
+        return;
+    }
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    filePreview.style.display = 'flex';
+    uploadBtn.style.display = 'block';
+    dropzone.style.display = 'none';
+}
+
+function clearFile() {
+    fileInput.value = '';
+    filePreview.style.display = 'none';
+    uploadBtn.style.display = 'none';
+    dropzone.style.display = 'block';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Loading state on submit
+uploadForm.addEventListener('submit', () => {
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing... This may take a moment';
+    uploadBtn.disabled = true;
+});
+</script>
+{% endblock %}

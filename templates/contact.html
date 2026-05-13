@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Contact — ResumeIQ{% endblock %}
+
+{% block content %}
+<section class="contact-section">
+    <div class="section-container">
+        <div class="section-header animate-fade-in">
+            <span class="section-badge">Get in Touch</span>
+            <h2 class="section-title">Contact <span class="gradient-text">Us</span></h2>
+            <p class="section-subtitle">Have questions, feedback, or need support? We'd love to hear from you.</p>
+        </div>
+
+        <div class="contact-grid animate-fade-in-up">
+            <!-- Contact Form -->
+            <div class="contact-form-wrapper glass-card">
+                <form method="POST" action="{{ url_for('contact') }}" class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="contact_name"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="contact_name" name="name" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_email"><i class="fas fa-envelope"></i> Email Address</label>
+                        <input type="email" id="contact_email" name="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_subject"><i class="fas fa-tag"></i> Subject</label>
+                        <input type="text" id="contact_subject" name="subject" placeholder="How can we help?" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_message"><i class="fas fa-comment-dots"></i> Message</label>
+                        <textarea id="contact_message" name="message" rows="5" placeholder="Tell us more..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="contact-info-wrapper">
+                <div class="contact-info-card glass-card">
+                    <div class="contact-info-icon" style="--accent: #6C63FF;">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Email Us</h4>
+                    <p>support@resumeiq.com</p>
+                </div>
+                <div class="contact-info-card glass-card">
+                    <div class="contact-info-icon" style="--accent: #00D4FF;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Response Time</h4>
+                    <p>Within 24 hours</p>
+                </div>
+                <div class="contact-info-card glass-card">
+                    <div class="contact-info-icon" style="--accent: #FF6B9D;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h4>Location</h4>
+                    <p>Bangalore, India</p>
+                </div>
+                <div class="contact-info-card glass-card">
+                    <div class="contact-info-icon" style="--accent: #77DD77;">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h4>Open Source</h4>
+                    <p>github.com/resumeiq</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

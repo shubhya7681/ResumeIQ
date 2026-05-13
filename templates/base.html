@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ResumeIQ - AI-powered Resume Analyzer & Career Guidance Portal. Get instant resume analysis, ATS scoring, skill detection, and career recommendations.">
+    <title>{% block title %}ResumeIQ — AI Resume Analyzer{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=3">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- ─── Navigation ──────────────────────────────────────────────────── -->
+    <nav class="navbar" id="mainNav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-logo">
+                <i class="fas fa-bolt"></i>
+                <span>Resume<span class="logo-accent">IQ</span></span>
+            </a>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a></li>
+                    <li><a href="{{ url_for('upload') }}" class="nav-link {% if request.endpoint == 'upload' %}active{% endif %}">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload
+                    </a></li>
+                    <li><a href="{{ url_for('career_roadmap') }}" class="nav-link {% if request.endpoint == 'career_roadmap' %}active{% endif %}">
+                        <i class="fas fa-road"></i> Roadmap
+                    </a></li>
+                    {% if current_user.role == 'admin' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <i class="fas fa-shield-alt"></i> Admin
+                    </a></li>
+                    {% endif %}
+                    <li class="nav-user-section">
+                        <span class="nav-user"><i class="fas fa-user-circle"></i> {{ current_user.name }}</span>
+                        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline">Logout</a>
+                    </li>
+                {% else %}
+                    <li><a href="{{ url_for('contact') }}" class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a></li>
+                    <li><a href="{{ url_for('login') }}" class="btn btn-sm btn-outline">Login</a></li>
+                    <li><a href="{{ url_for('signup') }}" class="btn btn-sm btn-primary">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ─── Flash Messages ──────────────────────────────────────────────── -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash-message flash-{{ category }}" onclick="this.remove()">
+                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+                <button class="flash-close">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- ─── Error Display ───────────────────────────────────────────────── -->
+    {% if error %}
+    <div class="error-page">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h1>{{ error }}</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Go Home</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ─── Main Content ────────────────────────────────────────────────── -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ─── Footer ──────────────────────────────────────────────────────── -->
+    {% block footer %}
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="{{ url_for('index') }}" class="footer-logo">
+                        <i class="fas fa-bolt"></i> Resume<span>IQ</span>
+                    </a>
+                    <p>AI-powered resume analysis and career guidance platform. Get instant feedback, skill insights, and job recommendations.</p>
+                    <div class="footer-socials">
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('signup') }}">Get Started</a></li>
+                        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Features</h4>
+                    <ul>
+                        <li><a href="#">Resume Analysis</a></li>
+                        <li><a href="#">ATS Scoring</a></li>
+                        <li><a href="#">Career Roadmaps</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-group">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Resume Tips</a></li>
+                        <li><a href="#">Interview Prep</a></li>
+                        <li><a href="#">Career Guide</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 ResumeIQ. Built with <i class="fas fa-heart" style="color: #ff6b9d;"></i> and AI</p>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- ─── Chatbot Widget ──────────────────────────────────────────────── -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Toggle chat">
+            <i class="fas fa-comment-dots"></i>
+            <i class="fas fa-times" style="display: none;"></i>
+        </button>
+        <div class="chatbot-container" id="chatbotContainer" style="display: none;">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <i class="fas fa-robot"></i>
+                    <span>ResumeIQ Assistant</span>
+                </div>
+                <button class="chatbot-close" id="chatbotClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chat-message bot-message">
+                    <div class="message-content">
+                        Hi there! 👋 I'm your AI career assistant. Ask me about resume tips, interview prep, or career advice!
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbotInput" placeholder="Type your question..." aria-label="Chat input">
+                <button id="chatbotSend" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Scripts ─────────────────────────────────────────────────────── -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

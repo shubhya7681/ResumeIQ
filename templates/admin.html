@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — ResumeIQ{% endblock %}
+
+{% block content %}
+<section class="admin-section">
+    <div class="section-container">
+        <!-- Admin Header -->
+        <div class="dashboard-header animate-fade-in">
+            <div>
+                <h1><i class="fas fa-shield-alt"></i> Admin <span class="gradient-text">Dashboard</span></h1>
+                <p>Manage users, resumes, and view platform analytics</p>
+            </div>
+        </div>
+
+        <!-- Analytics Cards -->
+        <div class="stats-grid animate-fade-in-up">
+            <div class="stat-card glass-card">
+                <div class="stat-icon" style="--accent: #6C63FF;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_users }}</span>
+                    <span class="stat-label">Total Users</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon" style="--accent: #00D4FF;">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ total_resumes }}</span>
+                    <span class="stat-label">Total Resumes</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon" style="--accent: #FF6B9D;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ avg_score }}</span>
+                    <span class="stat-label">Avg Resume Score</span>
+                </div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon" style="--accent: #77DD77;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ avg_ats }}</span>
+                    <span class="stat-label">Avg ATS Score</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs animate-fade-in-up delay-1">
+            <button class="tab-btn active" onclick="switchTab('users')">
+                <i class="fas fa-users"></i> Users ({{ users|length }})
+            </button>
+            <button class="tab-btn" onclick="switchTab('resumes')">
+                <i class="fas fa-file-alt"></i> Resumes ({{ resumes|length }})
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-pie"></i> Analytics
+            </button>
+        </div>
+
+        <!-- Users Tab -->
+        <div class="tab-content glass-card" id="tab-users">
+            <div class="card-header">
+                <h3><i class="fas fa-users"></i> All Users</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Resumes</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td><strong>{{ user.name }}</strong></td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="role-badge role-{{ user.role }}">
+                                    <i class="fas {% if user.role == 'admin' %}fa-shield-alt{% else %}fa-user{% endif %}"></i>
+                                    {{ user.role|capitalize }}
+                                </span>
+                            </td>
+                            <td>{{ user.resumes|length }}</td>
+                            <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                {% if user.role != 'admin' %}
+                                <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}" 
+                                      style="display:inline;" onsubmit="return confirm('Delete user {{ user.name }} and all their data?')">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">Protected</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumes Tab -->
+        <div class="tab-content glass-card" id="tab-resumes" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-file-alt"></i> All Resumes</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>File</th>
+                            <th>Score</th>
+                            <th>ATS</th>
+                            <th>Skills</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resume in resumes %}
+                        <tr>
+                            <td>{{ resume.id }}</td>
+                            <td>{{ resume.user.name }}</td>
+                            <td>
+                                <div class="file-name">
+                                    <i class="fas fa-file-{% if resume.original_filename.endswith('.pdf') %}pdf{% else %}word{% endif %}"
+                                       style="color: {% if resume.original_filename.endswith('.pdf') %}#ff4444{% else %}#4488ff{% endif %};"></i>
+                                    {{ resume.original_filename|truncate(25) }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="score-badge {% if resume.score >= 70 %}score-high{% elif resume.score >= 40 %}score-mid{% else %}score-low{% endif %}">
+                                    {{ "%.0f"|format(resume.score) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="score-badge {% if resume.ats_score >= 70 %}score-high{% elif resume.ats_score >= 40 %}score-mid{% else %}score-low{% endif %}">
+                                    {{ "%.0f"|format(resume.ats_score) }}
+                                </span>
+                            </td>
+                            <td>{{ resume.skills|length }}</td>
+                            <td>{{ resume.upload_date.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('analysis', resume_id=resume.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_resume', resume_id=resume.id) }}"
+                                          style="display:inline;" onsubmit="return confirm('Delete this resume?')">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="tab-content glass-card" id="tab-analytics" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-pie"></i> Platform Analytics</h3>
+            </div>
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h4>Score Distribution</h4>
+                    <canvas id="scoreDistChart" height="250"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h4>Upload Activity</h4>
+                    <canvas id="activityChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Tab switching
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tabName).style.display = 'block';
+    event.target.closest('.tab-btn').classList.add('active');
+    
+    // Initialize charts on analytics tab
+    if (tabName === 'analytics') initAnalyticsCharts();
+}
+
+function initAnalyticsCharts() {
+    // Score Distribution
+    const scores = [
+        {% for r in resumes %}{{ "%.0f"|format(r.score) }},{% endfor %}
+    ];
+    const buckets = [0,0,0,0,0]; // 0-20, 21-40, 41-60, 61-80, 81-100
+    scores.forEach(s => {
+        if (s <= 20) buckets[0]++;
+        else if (s <= 40) buckets[1]++;
+        else if (s <= 60) buckets[2]++;
+        else if (s <= 80) buckets[3]++;
+        else buckets[4]++;
+    });
+
+    const distCtx = document.getElementById('scoreDistChart');
+    if (distCtx && !distCtx.chart) {
+        distCtx.chart = new Chart(distCtx, {
+            type: 'bar',
+            data: {
+                labels: ['0-20', '21-40', '41-60', '61-80', '81-100'],
+                datasets: [{
+                    label: 'Number of Resumes',
+                    data: buckets,
+                    backgroundColor: ['#ff4444', '#ffaa44', '#ffdd44', '#77dd77', '#00d4ff'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // Activity chart (resumes per user)
+    const userData = {};
+    {% for r in resumes %}
+    userData['{{ r.user.name }}'] = (userData['{{ r.user.name }}'] || 0) + 1;
+    {% endfor %}
+    
+    const actCtx = document.getElementById('activityChart');
+    if (actCtx && !actCtx.chart) {
+        actCtx.chart = new Chart(actCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(userData),
+                datasets: [{
+                    data: Object.values(userData),
+                    backgroundColor: ['#6C63FF', '#00D4FF', '#FF6B9D', '#FFB347', '#77DD77', '#C49BFF'],
+                    borderColor: 'rgba(10,10,26,0.8)',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.7)', padding: 12 } } }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
